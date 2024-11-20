@@ -39,7 +39,7 @@ class Avatar extends TIMUIKitStatelessWidget {
         return SvgPicture.asset(
             TencentUtils.checkString(
                     selfInfoViewModel.globalConfig?.defaultAvatarAssetPath) ??
-                'images/default_c2c_head.png',
+                'images/default_c2c_head.svg',
             fit: BoxFit.cover,
             package:
                 selfInfoViewModel.globalConfig?.defaultAvatarAssetPath != null
@@ -49,7 +49,7 @@ class Avatar extends TIMUIKitStatelessWidget {
         return SvgPicture.asset(
             TencentUtils.checkString(
                     selfInfoViewModel.globalConfig?.defaultAvatarAssetPath) ??
-                'images/default_group_head.png',
+                'images/default_group_head.svg',
             fit: BoxFit.cover,
             package:
                 selfInfoViewModel.globalConfig?.defaultAvatarAssetPath != null
