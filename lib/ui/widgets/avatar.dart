@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:tencent_cloud_chat_uikit/business_logic/view_models/tui_self_info_view_model.dart';
 import 'package:tencent_cloud_chat_uikit/ui/utils/common_utils.dart';
 import 'package:tencent_cloud_chat_uikit/ui/widgets/image_screen.dart';
@@ -35,7 +36,7 @@ class Avatar extends TIMUIKitStatelessWidget {
   Widget getImageWidget(BuildContext context, TUITheme theme) {
     Widget defaultAvatar() {
       if (type == 1) {
-        return Image.asset(
+        return SvgPicture.asset(
             TencentUtils.checkString(
                     selfInfoViewModel.globalConfig?.defaultAvatarAssetPath) ??
                 'images/default_c2c_head.png',
@@ -45,7 +46,7 @@ class Avatar extends TIMUIKitStatelessWidget {
                     ? null
                     : 'tencent_cloud_chat_uikit');
       } else {
-        return Image.asset(
+        return SvgPicture.asset(
             TencentUtils.checkString(
                     selfInfoViewModel.globalConfig?.defaultAvatarAssetPath) ??
                 'images/default_group_head.png',

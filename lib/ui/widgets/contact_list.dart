@@ -42,6 +42,7 @@ class ContactList extends StatefulWidget {
   final Widget Function(BuildContext context)? emptyBuilder;
 
   final String? currentItem;
+  final int? userType;
 
   const ContactList({
     Key? key,
@@ -59,6 +60,7 @@ class ContactList extends StatefulWidget {
     this.groupMemberList,
     this.emptyBuilder,
     this.currentItem,
+    this.userType,
   }) : super(key: key);
 
   @override
