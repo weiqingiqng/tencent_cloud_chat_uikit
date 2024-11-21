@@ -70,6 +70,8 @@ class TIMUIKitConversation extends StatefulWidget {
 
   final List<Map<String, String>>? groups;
 
+  final String? searchText;
+
   const TIMUIKitConversation({
     Key? key,
     this.lifeCycle,
@@ -85,6 +87,7 @@ class TIMUIKitConversation extends StatefulWidget {
     this.isShowOnlineStatus = true,
     this.friends,
     this.groups,
+    this.searchText,
   }) : super(key: key);
 
   @override
@@ -201,6 +204,12 @@ class _TIMUIKitConversationState extends TIMUIKitState<TIMUIKitConversation> {
             (element?.userID != null &&
                 widget.friends!.contains(element?.userID))))
         .toList();
+    if (widget.searchText != null && widget.searchText!.isNotEmpty) {
+      filteredConversationList = filteredConversationList
+          .where((conversation) =>
+              conversation!.showName!.contains(widget.searchText!))
+          .toList();
+    }
     if (widget.conversationCollector != null) {
       filteredConversationList = filteredConversationList
           .where(widget.conversationCollector!)
