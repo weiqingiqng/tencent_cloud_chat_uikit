@@ -68,7 +68,7 @@ class TIMUIKitConversation extends StatefulWidget {
 
   final List<String>? friends;
 
-  final List<dynamic>? groups;
+  final List<Map<String,String>>? groups;
 
   final String? searchText;
 
