@@ -484,7 +484,13 @@ class _TIMUIKitConversationState extends TIMUIKitState<TIMUIKitConversation> {
           return TUIKitScreenUtils.getDeviceWidget(
               context: context,
               defaultWidget: SlidableAutoCloseBehavior(
-                child: conversationList(),
+                child: EasyRefresh(
+                  header: CustomizeBallPulseHeader(color: theme.primaryColor),
+                  onRefresh: () async {
+                    model.refresh();
+                  },
+                  child: conversationList(),
+                ),
               ),
               desktopWidget: Scrollbar(
                   controller: _autoScrollController,
