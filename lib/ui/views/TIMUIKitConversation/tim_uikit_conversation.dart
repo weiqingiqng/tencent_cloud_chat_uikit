@@ -68,7 +68,7 @@ class TIMUIKitConversation extends StatefulWidget {
 
   final List<String>? friends;
 
-  final List<Map<String,String>>? groups;
+  final List<Map<String, String>>? groups;
 
   final String? searchText;
 
@@ -196,7 +196,7 @@ class _TIMUIKitConversationState extends TIMUIKitState<TIMUIKitConversation> {
         conversationID: conversation.conversationID);
   }
 
-  List<V2TimConversation?> getFilteredConversation() {
+  Future<List<V2TimConversation?>> getFilteredConversation() async {
     List<V2TimConversation?> filteredConversationList = model.conversationList
         .where((element) => ((element?.groupID != null &&
                 widget.groups!
@@ -204,6 +204,20 @@ class _TIMUIKitConversationState extends TIMUIKitState<TIMUIKitConversation> {
             (element?.userID != null &&
                 widget.friends!.contains(element?.userID))))
         .toList();
+    for (var group in widget.groups!) {
+      final groupId = group['groupId'];
+      if (!filteredConversationList
+          .any((conversation) => conversation?.groupID == groupId)) {
+        V2TimValueCallback<V2TimConversation> getConversationRes =
+            await TencentImSDKPlugin.v2TIMManager
+                .getConversationManager()
+                .getConversation(conversationID: 'group_$groupId');
+        if (getConversationRes.code == 0 && getConversationRes.data != null) {
+          filteredConversationList.add(getConversationRes.data);
+        }
+      }
+    }
+    for (var i = 0; i < widget.friends!.length; i++) {}
     if (widget.searchText != null && widget.searchText!.isNotEmpty) {
       filteredConversationList = filteredConversationList
           .where((conversation) =>
@@ -218,8 +232,8 @@ class _TIMUIKitConversationState extends TIMUIKitState<TIMUIKitConversation> {
     return filteredConversationList;
   }
 
-  _onScrollToConversation(String conversationID) {
-    final msgList = getFilteredConversation();
+  _onScrollToConversation(String conversationID) async {
+    final msgList = await getFilteredConversation();
     bool isFound = false;
     int targetIndex = 1;
     for (int i = msgList.length - 1; i >= 0; i--) {
@@ -243,17 +257,17 @@ class _TIMUIKitConversationState extends TIMUIKitState<TIMUIKitConversation> {
       V2TimConversation conversationItem, VoidCallback onClose) {
     return TUIKitColumnMenu(data: [
       if (!PlatformUtils().isWeb)
-      ColumnMenuItem(
-          label: conversationItem.isPinned! ? TIM_t("取消置顶") : TIM_t("置顶"),
-          icon: Icon(
-              conversationItem.isPinned!
-                  ? Icons.vertical_align_bottom
-                  : Icons.vertical_align_top,
-              size: 16),
-          onClick: () {
-            onClose();
-            _pinConversation(conversationItem);
-          }),
+        ColumnMenuItem(
+            label: conversationItem.isPinned! ? TIM_t("取消置顶") : TIM_t("置顶"),
+            icon: Icon(
+                conversationItem.isPinned!
+                    ? Icons.vertical_align_bottom
+                    : Icons.vertical_align_top,
+                size: 16),
+            onClick: () {
+              onClose();
+              _pinConversation(conversationItem);
+            }),
     ]);
   }
 
@@ -263,15 +277,15 @@ class _TIMUIKitConversationState extends TIMUIKitState<TIMUIKitConversation> {
     final theme = themeViewModel.theme;
     return [
       if (!PlatformUtils().isWeb)
-      ConversationItemSlidePanel(
-        onPressed: (context) {
-          _pinConversation(conversationItem);
-        },
-        backgroundColor:
-            theme.conversationItemSliderPinBgColor ?? CommonColor.infoColor,
-        foregroundColor: theme.conversationItemSliderTextColor,
-        label: conversationItem.isPinned! ? TIM_t("取消置顶") : TIM_t("置顶"),
-      ),
+        ConversationItemSlidePanel(
+          onPressed: (context) {
+            _pinConversation(conversationItem);
+          },
+          backgroundColor:
+              theme.conversationItemSliderPinBgColor ?? CommonColor.infoColor,
+          foregroundColor: theme.conversationItemSliderTextColor,
+          label: conversationItem.isPinned! ? TIM_t("取消置顶") : TIM_t("置顶"),
+        ),
     ];
   }
 
@@ -309,142 +323,163 @@ class _TIMUIKitConversationState extends TIMUIKitState<TIMUIKitConversation> {
               Provider.of<TUIFriendShipViewModel>(context);
           _model.lifeCycle = widget.lifeCycle;
 
-          List<V2TimConversation?> filteredConversationList =
-              getFilteredConversation();
-
           if (TencentUtils.checkString(_model.scrollToConversation) != null) {
             _onScrollToConversation(_model.scrollToConversation!);
             _model.clearScrollToConversation();
           }
 
           Widget conversationList() {
-            return filteredConversationList.isNotEmpty
-                ? ListView.builder(
-                    controller: _autoScrollController,
-                    shrinkWrap: true,
-                    itemCount: filteredConversationList.length,
-                    itemBuilder: (context, index) {
-                      if (index == filteredConversationList.length - 1) {
-                        if (haveMoreData) {
-                          _timuiKitConversationController.loadData();
-                        }
-                      }
-                      String planName = '';
-                      String subjectNo = '';
-                      final conversationItem = filteredConversationList[index];
-                      if (conversationItem?.type != 1) {
-                        final groupIndex = widget.groups?.indexWhere((group) =>
-                            group['groupId'] == conversationItem?.groupID);
-                        if (groupIndex != null) {
-                          planName =
-                              widget.groups![groupIndex]['planName'] ?? '';
-                          subjectNo =
-                              widget.groups![groupIndex]['subjectNo'] ?? '';
-                        }
-                      }
+            return FutureBuilder<List<V2TimConversation?>>(
+                future: getFilteredConversation(),
+                builder: (context, snapshot) {
+                  List<V2TimConversation?> filteredConversationList =
+                   snapshot.data ?? [];
+                  return filteredConversationList.isNotEmpty
+                      ? ListView.builder(
+                          controller: _autoScrollController,
+                          shrinkWrap: true,
+                          itemCount: filteredConversationList.length,
+                          itemBuilder: (context, index) {
+                            if (index == filteredConversationList.length - 1) {
+                              if (haveMoreData) {
+                                _timuiKitConversationController.loadData();
+                              }
+                            }
+                            String planName = '';
+                            String subjectNo = '';
+                            final conversationItem =
+                                filteredConversationList[index];
+                            if (conversationItem?.type != 1) {
+                              final groupIndex = widget.groups?.indexWhere(
+                                  (group) =>
+                                      group['groupId'] ==
+                                      conversationItem?.groupID);
+                              if (groupIndex != null) {
+                                planName = widget.groups![groupIndex]
+                                        ['planName'] ??
+                                    '';
+                                subjectNo = widget.groups![groupIndex]
+                                        ['subjectNo'] ??
+                                    '';
+                              }
+                            }
 
-                      final V2TimUserStatus? onlineStatus =
-                          _friendShipViewModel.userStatusList.firstWhere(
-                              (item) => item.userID == conversationItem?.userID,
-                              orElse: () => V2TimUserStatus(statusType: 0));
+                            final V2TimUserStatus? onlineStatus =
+                                _friendShipViewModel.userStatusList.firstWhere(
+                                    (item) =>
+                                        item.userID == conversationItem?.userID,
+                                    orElse: () =>
+                                        V2TimUserStatus(statusType: 0));
 
-                      if (widget.itemBuilder != null) {
-                        return widget.itemBuilder!(
-                            conversationItem!, onlineStatus);
-                      }
+                            if (widget.itemBuilder != null) {
+                              return widget.itemBuilder!(
+                                  conversationItem!, onlineStatus);
+                            }
 
-                      final slideChildren =
-                          _getSlideBuilder()(conversationItem!);
+                            final slideChildren =
+                                _getSlideBuilder()(conversationItem!);
 
-                      final isCurrent = conversationItem.conversationID ==
-                          model.selectedConversation?.conversationID;
+                            final isCurrent = conversationItem.conversationID ==
+                                model.selectedConversation?.conversationID;
 
-                      final isPined = conversationItem.isPinned ?? false;
+                            final isPined = conversationItem.isPinned ?? false;
 
-                      Widget conversationLineItem() {
-                        return Material(
-                          color: (isCurrent && isDesktopScreen)
-                              ? theme.conversationItemChooseBgColor
-                              : isPined
-                                  ? theme.conversationItemPinedBgColor
-                                  : theme.conversationItemBgColor,
-                          child: GestureDetector(
-                            child: TIMUIKitConversationItem(
-                              isCurrent: isCurrent,
-                              isShowDraft: widget.isShowDraft,
-                              lastMessageBuilder: widget.lastMessageBuilder,
-                              faceUrl: conversationItem.faceUrl ?? "",
-                              nickName: conversationItem.type == 1
-                                  ? conversationItem.showName ?? ""
-                                  : planName,
-                              isDisturb: conversationItem.recvOpt != 0,
-                              lastMsg: conversationItem.lastMessage,
-                              isPined: isPined,
-                              groupAtInfoList:
-                                  conversationItem.groupAtInfoList ?? [],
-                              unreadCount: conversationItem.unreadCount ?? 0,
-                              draftText: conversationItem.draftText,
-                              onlineStatus: (widget.isShowOnlineStatus &&
-                                      conversationItem.userID != null &&
-                                      conversationItem.userID!.isNotEmpty)
-                                  ? onlineStatus
-                                  : null,
-                              draftTimestamp: conversationItem.draftTimestamp,
-                              convType: conversationItem.type,
-                              subjectNo: subjectNo,
-                            ),
-                            onTap: () => onTapConvItem(conversationItem),
-                          ),
-                        );
-                      }
+                            Widget conversationLineItem() {
+                              return Material(
+                                color: (isCurrent && isDesktopScreen)
+                                    ? theme.conversationItemChooseBgColor
+                                    : isPined
+                                        ? theme.conversationItemPinedBgColor
+                                        : theme.conversationItemBgColor,
+                                child: GestureDetector(
+                                  child: TIMUIKitConversationItem(
+                                    isCurrent: isCurrent,
+                                    isShowDraft: widget.isShowDraft,
+                                    lastMessageBuilder:
+                                        widget.lastMessageBuilder,
+                                    faceUrl: conversationItem.faceUrl ?? "",
+                                    nickName: conversationItem.type == 1
+                                        ? conversationItem.showName ?? ""
+                                        : planName,
+                                    isDisturb: conversationItem.recvOpt != 0,
+                                    lastMsg: conversationItem.lastMessage,
+                                    isPined: isPined,
+                                    groupAtInfoList:
+                                        conversationItem.groupAtInfoList ?? [],
+                                    unreadCount:
+                                        conversationItem.unreadCount ?? 0,
+                                    draftText: conversationItem.draftText,
+                                    onlineStatus: (widget.isShowOnlineStatus &&
+                                            conversationItem.userID != null &&
+                                            conversationItem.userID!.isNotEmpty)
+                                        ? onlineStatus
+                                        : null,
+                                    draftTimestamp:
+                                        conversationItem.draftTimestamp,
+                                    convType: conversationItem.type,
+                                    subjectNo: subjectNo,
+                                  ),
+                                  onTap: () => onTapConvItem(conversationItem),
+                                ),
+                              );
+                            }
 
-                      return TUIKitScreenUtils.getDeviceWidget(
-                          context: context,
-                          desktopWidget: AutoScrollTag(
-                            key: ValueKey(conversationItem.conversationID),
-                            controller: _autoScrollController,
-                            index: index,
-                            child: InkWell(
-                              onSecondaryTapDown: (details) {
-                                TUIKitWidePopup.showPopupWindow(
-                                    operationKey: TUIKitWideModalOperationKey
-                                        .conversationSecondaryMenu,
-                                    isDarkBackground: false,
-                                    borderRadius: const BorderRadius.all(
-                                        Radius.circular(4)),
-                                    context: context,
-                                    offset: Offset(
-                                        min(
-                                            details.globalPosition.dx,
-                                            MediaQuery.of(context).size.width -
-                                                80),
-                                        min(
-                                            details.globalPosition.dy,
-                                            MediaQuery.of(context).size.height -
-                                                130)),
-                                    child: (onClose) => _getSecondaryMenu(
-                                        conversationItem, onClose));
-                              },
-                              child: conversationLineItem(),
-                            ),
-                          ),
-                          defaultWidget: AutoScrollTag(
-                            key: ValueKey(conversationItem.conversationID),
-                            controller: _autoScrollController,
-                            index: index,
-                            child: Slidable(
-                                groupTag: 'conversation-list',
-                                child: conversationLineItem(),
-                                endActionPane: ActionPane(
-                                    extentRatio:
-                                        slideChildren.length > 2 ? 0.77 : 0.5,
-                                    motion: const DrawerMotion(),
-                                    children: slideChildren)),
-                          ));
-                    })
-                : (widget.emptyBuilder != null
-                    ? widget.emptyBuilder!()
-                    : Container());
+                            return TUIKitScreenUtils.getDeviceWidget(
+                                context: context,
+                                desktopWidget: AutoScrollTag(
+                                  key:
+                                      ValueKey(conversationItem.conversationID),
+                                  controller: _autoScrollController,
+                                  index: index,
+                                  child: InkWell(
+                                    onSecondaryTapDown: (details) {
+                                      TUIKitWidePopup.showPopupWindow(
+                                          operationKey:
+                                              TUIKitWideModalOperationKey
+                                                  .conversationSecondaryMenu,
+                                          isDarkBackground: false,
+                                          borderRadius: const BorderRadius.all(
+                                              Radius.circular(4)),
+                                          context: context,
+                                          offset: Offset(
+                                              min(
+                                                  details.globalPosition.dx,
+                                                  MediaQuery.of(context)
+                                                          .size
+                                                          .width -
+                                                      80),
+                                              min(
+                                                  details.globalPosition.dy,
+                                                  MediaQuery.of(context)
+                                                          .size
+                                                          .height -
+                                                      130)),
+                                          child: (onClose) => _getSecondaryMenu(
+                                              conversationItem, onClose));
+                                    },
+                                    child: conversationLineItem(),
+                                  ),
+                                ),
+                                defaultWidget: AutoScrollTag(
+                                  key:
+                                      ValueKey(conversationItem.conversationID),
+                                  controller: _autoScrollController,
+                                  index: index,
+                                  child: Slidable(
+                                      groupTag: 'conversation-list',
+                                      child: conversationLineItem(),
+                                      endActionPane: ActionPane(
+                                          extentRatio: slideChildren.length > 2
+                                              ? 0.77
+                                              : 0.5,
+                                          motion: const DrawerMotion(),
+                                          children: slideChildren)),
+                                ));
+                          })
+                      : (widget.emptyBuilder != null
+                          ? widget.emptyBuilder!()
+                          : Container());
+                });
           }
 
           return TUIKitScreenUtils.getDeviceWidget(
