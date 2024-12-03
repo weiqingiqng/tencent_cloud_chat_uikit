@@ -263,17 +263,6 @@ class _TIMUIKitConversationState extends TIMUIKitState<TIMUIKitConversation> {
     final theme = themeViewModel.theme;
     return [
       if (!PlatformUtils().isWeb)
-        ConversationItemSlidePanel(
-          onPressed: (context) {
-            _clearHistory(conversationItem);
-          },
-          backgroundColor: theme.conversationItemSliderClearBgColor ??
-              CommonColor.primaryColor,
-          foregroundColor: theme.conversationItemSliderTextColor,
-          label: TIM_t("清除"),
-          spacing: 0,
-          autoClose: true,
-        ),
       ConversationItemSlidePanel(
         onPressed: (context) {
           _pinConversation(conversationItem);
@@ -283,15 +272,6 @@ class _TIMUIKitConversationState extends TIMUIKitState<TIMUIKitConversation> {
         foregroundColor: theme.conversationItemSliderTextColor,
         label: conversationItem.isPinned! ? TIM_t("取消置顶") : TIM_t("置顶"),
       ),
-      ConversationItemSlidePanel(
-        onPressed: (context) {
-          _deleteConversation(conversationItem);
-        },
-        backgroundColor:
-            theme.conversationItemSliderDeleteBgColor ?? Colors.red,
-        foregroundColor: theme.conversationItemSliderTextColor,
-        label: TIM_t("删除"),
-      )
     ];
   }
 
