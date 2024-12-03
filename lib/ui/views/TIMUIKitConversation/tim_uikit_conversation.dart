@@ -243,13 +243,6 @@ class _TIMUIKitConversationState extends TIMUIKitState<TIMUIKitConversation> {
       V2TimConversation conversationItem, VoidCallback onClose) {
     return TUIKitColumnMenu(data: [
       if (!PlatformUtils().isWeb)
-        ColumnMenuItem(
-            label: TIM_t("清除消息"),
-            icon: const Icon(Icons.clear_all, size: 16),
-            onClick: () {
-              onClose();
-              _clearHistory(conversationItem);
-            }),
       ColumnMenuItem(
           label: conversationItem.isPinned! ? TIM_t("取消置顶") : TIM_t("置顶"),
           icon: Icon(
@@ -260,13 +253,6 @@ class _TIMUIKitConversationState extends TIMUIKitState<TIMUIKitConversation> {
           onClick: () {
             onClose();
             _pinConversation(conversationItem);
-          }),
-      ColumnMenuItem(
-          label: TIM_t("删除会话"),
-          icon: const Icon(Icons.delete_outline, size: 16),
-          onClick: () {
-            onClose();
-            _deleteConversation(conversationItem);
           }),
     ]);
   }
