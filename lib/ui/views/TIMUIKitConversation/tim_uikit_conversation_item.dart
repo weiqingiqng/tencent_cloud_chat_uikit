@@ -79,7 +79,7 @@ class TIMUIKitConversationItem extends TIMUIKitStatelessWidget {
     }
     return Expanded(
         child: Padding(
-          padding: const EdgeInsets.only(top: 2),
+          padding: const EdgeInsets.only(top: 8),
           child: Text(
             subjectNo?? '',
             softWrap: true,
