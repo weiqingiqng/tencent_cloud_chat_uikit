@@ -77,10 +77,15 @@ class TIMUIKitConversationItem extends TIMUIKitStatelessWidget {
         subjectNo: subjectNo,
       );
     }
-
-    return Container(
-      height: 0,
-    );
+    return Expanded(
+        child: Text(
+          subjectNo?? '',
+          softWrap: true,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(
+              height: 1, color: Color(0xFF999999), fontSize: 14),
+        ));
   }
 
   bool isHaveSecondLine() {

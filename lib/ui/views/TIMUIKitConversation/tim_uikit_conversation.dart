@@ -217,7 +217,6 @@ class _TIMUIKitConversationState extends TIMUIKitState<TIMUIKitConversation> {
         }
       }
     }
-    for (var i = 0; i < widget.friends!.length; i++) {}
     if (widget.searchText != null && widget.searchText!.isNotEmpty) {
       filteredConversationList = filteredConversationList
           .where((conversation) =>
@@ -361,6 +360,7 @@ class _TIMUIKitConversationState extends TIMUIKitState<TIMUIKitConversation> {
                                 subjectNo = widget.groups![groupIndex]
                                         ['subjectNo'] ??
                                     '';
+                                conversationItem?.showName = '$planName（$subjectNo）';
                               }
                             }
 
