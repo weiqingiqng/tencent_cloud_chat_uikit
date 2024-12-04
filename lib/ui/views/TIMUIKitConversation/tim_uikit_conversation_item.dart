@@ -78,13 +78,16 @@ class TIMUIKitConversationItem extends TIMUIKitStatelessWidget {
       );
     }
     return Expanded(
-        child: Text(
-          subjectNo?? '',
-          softWrap: true,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: const TextStyle(
-              height: 1, color: Color(0xFF999999), fontSize: 14),
+        child: Padding(
+          padding: const EdgeInsets.only(top: 2),
+          child: Text(
+            subjectNo?? '',
+            softWrap: true,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+                height: 1, color: Color(0xFF999999), fontSize: 14),
+          ),
         ));
   }
 
