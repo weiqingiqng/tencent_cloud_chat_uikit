@@ -287,18 +287,18 @@ class _VideoScreenState extends TIMUIKitState<VideoScreen> {
                     widget.videoElement.localVideoUrl!,
                   ));
     player.initialize().then((_) {
-      double aspectRatio = player.value.aspectRatio;
-      ChewieController controller = ChewieController(
-          videoPlayerController: player,
-          autoPlay: true,
-          looping: false,
-          showControlsOnInitialize: false,
-          allowPlaybackSpeedChanging: false,
-          aspectRatio: aspectRatio,
-          customControls: VideoCustomControls(downloadFn: () async {
-            return await _saveVideo();
-          }));
       setState(() {
+        double aspectRatio = player.value.aspectRatio;
+        ChewieController controller = ChewieController(
+            videoPlayerController: player,
+            autoPlay: true,
+            looping: false,
+            showControlsOnInitialize: false,
+            allowPlaybackSpeedChanging: false,
+            aspectRatio: aspectRatio,
+            customControls: VideoCustomControls(downloadFn: () async {
+              return await _saveVideo();
+            }));
         videoPlayerController = player;
         chewieController = controller;
         isInit = true;
