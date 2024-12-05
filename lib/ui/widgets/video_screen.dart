@@ -162,7 +162,7 @@ class _VideoScreenState extends TIMUIKitState<VideoScreen> {
         isAsset: true,
       );
     }
-    if (widget.videoElement.videoPath != '' && widget.videoElement.videoPath != null) {
+    if (widget.videoElement.videoPath != '' && widget.videoElement.videoPath != null && File(widget.videoElement.videoPath!).existsSync()) {
       File f = File(widget.videoElement.videoPath!);
       if (f.existsSync()) {
         return await _saveNetworkVideo(
@@ -222,36 +222,35 @@ class _VideoScreenState extends TIMUIKitState<VideoScreen> {
 
     VideoPlayerController player = PlatformUtils().isWeb
         ? ((TencentUtils.checkString(widget.videoElement.videoPath) != null) || widget.message.status == MessageStatus.V2TIM_MSG_STATUS_SENDING
-            ? VideoPlayerController.networkUrl(
-                Uri.parse(widget.videoElement.videoPath!),
-              )
-            : (TencentUtils.checkString(widget.videoElement.localVideoUrl) == null)
-                ? VideoPlayerController.networkUrl(
-                    Uri.parse(widget.videoElement.videoUrl!),
-                  )
-                : VideoPlayerController.networkUrl(
-                    Uri.parse(widget.videoElement.localVideoUrl!),
-                  ))
-        : (TencentUtils.checkString(widget.videoElement.videoPath) != null || widget.message.status == MessageStatus.V2TIM_MSG_STATUS_SENDING)
-            ? VideoPlayerController.file(File(widget.videoElement.videoPath!))
-            : (TencentUtils.checkString(widget.videoElement.localVideoUrl) == null)
-                ? VideoPlayerController.networkUrl(
-                    Uri.parse(widget.videoElement.videoUrl!),
-                  )
-                : VideoPlayerController.file(File(
-                    widget.videoElement.localVideoUrl!,
-                  ));
+        ? VideoPlayerController.networkUrl(
+      Uri.parse(widget.videoElement.videoPath!),
+    )
+        : (TencentUtils.checkString(widget.videoElement.localVideoUrl) == null)
+        ? VideoPlayerController.networkUrl(
+      Uri.parse(widget.videoElement.videoUrl!),
+    )
+        : VideoPlayerController.networkUrl(
+      Uri.parse(widget.videoElement.localVideoUrl!),
+    ))
+        : ((TencentUtils.checkString(widget.videoElement.videoPath) != null || widget.message.status == MessageStatus.V2TIM_MSG_STATUS_SENDING) && File(widget.videoElement.videoPath!).existsSync())
+        ? VideoPlayerController.file(File(widget.videoElement.videoPath!))
+        : (TencentUtils.checkString(widget.videoElement.localVideoUrl) == null)
+        ? VideoPlayerController.networkUrl(
+      Uri.parse(widget.videoElement.videoUrl!),
+    )
+        : VideoPlayerController.file(File(
+      widget.videoElement.localVideoUrl!,
+    ));
     await player.initialize();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      double w = getVideoWidth();
-      double h = getVideoHeight();
+      double aspectRatio = player.value.aspectRatio;
       ChewieController controller = ChewieController(
           videoPlayerController: player,
           autoPlay: true,
           looping: false,
           showControlsOnInitialize: false,
           allowPlaybackSpeedChanging: false,
-          aspectRatio: w == 0 || h == 0 ? null : w / h,
+          aspectRatio: aspectRatio,
           customControls: VideoCustomControls(downloadFn: () async {
             return await _saveVideo();
           }));
