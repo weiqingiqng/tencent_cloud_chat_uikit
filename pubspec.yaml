@@ -29,7 +29,7 @@ dependencies:
   file_picker: ^5.3.0
   tencent_super_tooltip: ^0.0.1
   video_player: ^2.9.0
-  chewie: ^1.7.5
+  chewie: ^1.8.5
   flutter_slidable: ^3.0.1
   flutter_plugin_record_plus: ^0.0.16
   azlistview_all_platforms: ^2.1.2
@@ -46,7 +46,7 @@ dependencies:
   extended_image: ^8.2.0
   extended_text_field: ^15.0.0
   extended_text: ^13.0.0
-  package_info_plus: ^4.0.1
+  package_info_plus: ^8.1.1
   loading_animation_widget: ^1.1.0+3
   permission_handler: ^10.2.0
   tuple: ^2.0.0
