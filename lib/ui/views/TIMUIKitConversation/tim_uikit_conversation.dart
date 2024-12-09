@@ -214,9 +214,7 @@ class _TIMUIKitConversationState extends TIMUIKitState<TIMUIKitConversation> {
                 .getConversation(conversationID: 'group_$groupId');
         V2TimConversation? targetConversation = getConversationRes.data;
         if (getConversationRes.code == 0 && targetConversation != null) {
-          targetConversation.lastMessage = V2TimMessage(elemType: 0);
-          targetConversation.lastMessage?.timestamp = (DateTime.now()).microsecondsSinceEpoch ~/ 1000;
-          filteredConversationList.add(targetConversation);
+          filteredConversationList.insert(0, targetConversation);
         }
       }
     }
