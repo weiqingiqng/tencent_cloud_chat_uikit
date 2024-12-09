@@ -212,8 +212,10 @@ class _TIMUIKitConversationState extends TIMUIKitState<TIMUIKitConversation> {
             await TencentImSDKPlugin.v2TIMManager
                 .getConversationManager()
                 .getConversation(conversationID: 'group_$groupId');
-        if (getConversationRes.code == 0 && getConversationRes.data != null) {
-          filteredConversationList.add(getConversationRes.data);
+        V2TimConversation? targetConversation = getConversationRes.data;
+        if (getConversationRes.code == 0 && targetConversation != null) {
+          targetConversation.lastMessage?.timestamp = (DateTime.now()).microsecondsSinceEpoch ~/ 1000;
+          filteredConversationList.add(targetConversation);
         }
       }
     }

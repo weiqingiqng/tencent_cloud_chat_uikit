@@ -295,7 +295,7 @@ class _TIMUIKitVideoElemState extends TIMUIKitState<TIMUIKitVideoElem> {
                               child: Center(
                                   child: Image.asset('images/play.png',
                                       package: 'tencent_cloud_chat_uikit',
-                                      height: 64)),
+                                      height: 30)),
                             ),
                           if (widget.message.videoElem?.duration != null &&
                               widget.message.videoElem!.duration! > 0)
